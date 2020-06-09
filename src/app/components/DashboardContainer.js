@@ -1,52 +1,51 @@
-import React, { Component } from 'react'
+import React, { Component, useState, useEffect } from 'react'
 import Axios from 'axios';
 import appServices from '../services/app.services';
+import { TileView } from './views/TileView';
+import { GridView } from './views/GridView';
 
-export default class DashboardContainer extends Component {
-    state = {
-        users: [],
-        count: 0,
-        loaded: false
-    }
-    componentDidMount() {
-        this.loadUsers();
-    }
+const DashboardContainer = () => {
+    const [users, setusers] = useState([]);
+    const [count, setcount] = useState(0);
+    const [loaded, setloaded] = useState(false)
+    const [view, setview] = useState('tile')
 
-    loadUsers = async () => {
-        this.setState({
-            loaded: false,
-            users: [],
-            count: 0
-        });
+    useEffect(() => {
+        loadUsers();
+    }, [])
+
+
+    const loadUsers = async () => {
+        setloaded(false);
+        setusers([]);
+        setcount(0);
+
 
         try {
             const users = await appServices.getUsers();
-            this.setState({
-                users: users,
-                count: users.length,
-                loaded: true
-            });
+            setloaded(true);
+            setusers(users);
+            setcount(users.length);
         } catch (error) {
-            this.setState({
-                loaded: false
-            });
+            setloaded(false);
         }
     }
 
 
 
-    render() {
-        const { loaded, users } = this.state;
-        return (
-            <div>
-                {
-                    loaded == true ? <div>
-                        {
-                            users.map(u => <h1  key={u.id}>{u.name}</h1>)
-                        }
-                    </div> : null
-                }
-            </div>
-        )
-    }
+
+    return (
+        <div class="container-fluid">
+
+            {
+                loaded == true ? <div>
+                    {
+                        view === 'tile' ? <TileView users={users} /> : <GridView users={users} />
+                    }
+                </div> : 'Loadin ..'
+            }
+        </div>
+    )
 }
+
+export default DashboardContainer;
